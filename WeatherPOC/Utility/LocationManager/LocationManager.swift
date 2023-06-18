@@ -14,7 +14,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var locationManager = CLLocationManager()
     @Published var locationStatus: CLAuthorizationStatus?
     var lastLocation: CLLocationCoordinate2D?
-    var callBackUpdatedLocation: ((CLLocationCoordinate2D) -> Void)?
+    var callBackUpdatedLocation: ((CLLocationCoordinate2D) async -> Void)?
     
     override init() {
         super.init()
@@ -39,15 +39,15 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+    internal func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         locationStatus = status
 
     }
     
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    private func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) async {
         guard let location = locations.last else { return }
         lastLocation = location.coordinate
-        callBackUpdatedLocation?(location.coordinate)
+        await callBackUpdatedLocation?(location.coordinate)
         locationManager.delegate = nil
         locationManager.stopUpdatingLocation()
         

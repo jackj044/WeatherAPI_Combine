@@ -30,10 +30,10 @@ class LocationSearchViewModel: ObservableObject {
         return String(str)
     }
     
-    func searchCities(_ text:String?){
+    func searchCities(_ text:String?) async{
         
         let request = SearchRequest(keyword: text ?? "")
-        NetworkManager.shared.makeNetworkCall(endpoint: Endpoint.place, httpMethod: .GET, parameters: request.toJSON,type: [SearchResponse].self).sink { completion in
+       await NetworkManager.shared.makeNetworkCall(endpoint: Endpoint.place, httpMethod: .GET, parameters: request.toJSON,type: [SearchResponse].self).sink { completion in
             switch completion {
             case .failure(let err):
                 print("Error is \(err.localizedDescription)")

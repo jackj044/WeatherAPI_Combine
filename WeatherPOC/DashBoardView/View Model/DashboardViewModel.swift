@@ -18,12 +18,14 @@ class DashboardViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     // API Call for get weather
-    func getWeather(lat: Double, long: Double) {
+    func getWeather(lat: Double, long: Double) async {
+        DispatchQueueMain.async {
+            self.isLoading = true
+        }
         
-        isLoading = true
         let request = WeatherRequest(lat: lat, long: long)
         
-        NetworkManager.shared.makeNetworkCall(endpoint: .getWeather, httpMethod: .GET, parameters: request.toJSON,type: WeatherData.self).sink { completion in
+        await NetworkManager.shared.makeNetworkCall(endpoint: .getWeather, httpMethod: .GET, parameters: request.toJSON,type: WeatherData.self).sink { completion in
             self.isLoading = false
             switch completion {
             case .failure(let err):
@@ -32,8 +34,10 @@ class DashboardViewModel: ObservableObject {
                 print("Finished")
             }
         } receiveValue: { [weak self] data  in
+            
             self?.isLoading = false
             self?.weatherResponse = data
+            
         }
         .store(in: &cancellables)
     }
@@ -53,19 +57,19 @@ class DashboardViewModel: ObservableObject {
     /// > 2. If user have location permission & updated location at that time App will show weather data of current location
     /// > 3. If user have no any searched location either not turn on location at that time app will show default loaction data
     
-    func getSelectedLocation(currentLocation: CLLocationCoordinate2D?) {
+    func getSelectedLocation(currentLocation: CLLocationCoordinate2D?) async{
         
         if let savedLocation = AppUserDefaults.object(forKey: UserDefaultSelectedLocation) as? Data {
             let decoder = JSONDecoder()
             if let selectedLocation = try? decoder.decode(SearchResponse.self, from: savedLocation) {
-                getWeather(lat: selectedLocation.lat, long: selectedLocation.lon)
+                await getWeather(lat: selectedLocation.lat, long: selectedLocation.lon)
             }
         } else {
             
             if let currentLocation = currentLocation {
-                getWeather(lat: currentLocation.latitude, long: currentLocation.longitude)
+                await getWeather(lat: currentLocation.latitude, long: currentLocation.longitude)
             } else {
-                getWeather(lat: DefaultLatitude, long: DefaultLongitude)
+                await getWeather(lat: DefaultLatitude, long: DefaultLongitude)
             }
         }
     }

@@ -39,9 +39,9 @@ class NetworkManager {
     /// Endpoint
     /// HTTP Method
     /// Model Type which is generic
-    func makeNetworkCall<T: Decodable>(endpoint: Endpoint,httpMethod:HttpMethods, parameters: [String: Any], type: T.Type) -> Future<T, Error> {
+    func makeNetworkCall<T: Decodable>(endpoint: Endpoint,httpMethod:HttpMethods, parameters: [String: Any], type: T.Type) async -> Future<T, Error> {
         return Future<T, Error> { [weak self] promise in
-            guard let self = self, let url = URL(string: self.baseURL.appending(endpoint.rawValue)) else {
+            guard let self1 = self, let url = URL(string: self1.baseURL.appending(endpoint.rawValue)) else {
                 return promise(.failure(NetworkError.invalidURL))
             }
             
@@ -58,7 +58,7 @@ class NetworkManager {
                 }
             }
             
-//            debugPrint("URL is \(String(describing: request.urlRequest?.url?.absoluteString))")
+            //            debugPrint("URL is \(String(describing: request.urlRequest?.url?.absoluteString))")
             URLSession.shared.dataTaskPublisher(for: (request))
                 .tryMap { (data, response) -> Data in
                     guard let httpResponse = response as? HTTPURLResponse, 200...299 ~= httpResponse.statusCode else {
@@ -83,7 +83,7 @@ class NetworkManager {
                     debugPrint("Response : =============\(value)=============")
                     promise(.success(value))
                 })
-                .store(in: &self.cancellables)
+                .store(in: &self1.cancellables)
         }
     }
 }

@@ -63,10 +63,13 @@ struct DashboardView: View {
                         Spacer()
                     }
                     .onAppear {
-                        locationManager.callBackUpdatedLocation = { currentLocation in
-                            dashboardViewModel.getSelectedLocation(currentLocation: currentLocation)
+                        Task{
+                            locationManager.callBackUpdatedLocation = { currentLocation in
+                               await dashboardViewModel.getSelectedLocation(currentLocation: currentLocation)
+                            }
+                            await dashboardViewModel.getSelectedLocation(currentLocation: locationManager.lastLocation)
                         }
-                        dashboardViewModel.getSelectedLocation(currentLocation: locationManager.lastLocation)
+                        
                     }
                     .navigationTitle("Weather")
                     .padding()

@@ -23,8 +23,11 @@ struct LocationSearchView: View {
                     .padding(.leading,20)
                 TextField("Search here", text: $searchText)
                     .onSubmit {
-                        locatinoSearchViewModel.searchData = []
-                        locatinoSearchViewModel.searchCities(searchText)
+                        Task {
+                            locatinoSearchViewModel.searchData = []
+                           await locatinoSearchViewModel.searchCities(searchText)
+                        }
+                        
                     }
             }
             .frame(
